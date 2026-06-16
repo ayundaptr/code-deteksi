@@ -1,0 +1,124 @@
+============================================================
+  Silat SVM — Training + Save
+============================================================
+
+[1/3] Building dataset…
+  Loaded: 120 segments | Skipped: 0
+
+[2/3] LOSO evaluation (best fixed parameters)…
+
+============================================================
+  LOSO: Movement Classifier   Accuracy: 0.6333 (63.3%)
+                 precision    recall  f1-score   support
+
+       Jep Kiri       0.65      0.65      0.65        20
+      Jep Kanan       0.68      0.75      0.71        20
+ Tangkisan Kiri       0.67      0.60      0.63        20
+Tangkisan Kanan       0.55      0.55      0.55        20
+ Kombinasi Kiri       0.65      0.65      0.65        20
+Kombinasi Kanan       0.60      0.60      0.60        20
+
+       accuracy                           0.63       120
+      macro avg       0.63      0.63      0.63       120
+   weighted avg       0.63      0.63      0.63       120
+
+  [GRAFIK] Matriks disimpan ke → ./evaluasi_charts\matrix_movement_classifier.png
+
+============================================================
+  LOSO: Correctness – Jep Kiri   Accuracy: 1.0000 (100.0%)
+              precision    recall  f1-score   support
+
+       Salah       1.00      1.00      1.00        10
+       Benar       1.00      1.00      1.00        10
+
+    accuracy                           1.00        20
+   macro avg       1.00      1.00      1.00        20
+weighted avg       1.00      1.00      1.00        20
+
+  [GRAFIK] Matriks disimpan ke → ./evaluasi_charts\matrix_correctness_jep_kiri.png
+
+============================================================
+  LOSO: Correctness – Jep Kanan   Accuracy: 0.8000 (80.0%)
+              precision    recall  f1-score   support
+
+       Salah       0.80      0.80      0.80        10
+       Benar       0.80      0.80      0.80        10
+
+    accuracy                           0.80        20
+   macro avg       0.80      0.80      0.80        20
+weighted avg       0.80      0.80      0.80        20
+
+  [GRAFIK] Matriks disimpan ke → ./evaluasi_charts\matrix_correctness_jep_kanan.png
+
+============================================================
+  LOSO: Correctness – Tangkisan Kiri   Accuracy: 0.7000 (70.0%)
+              precision    recall  f1-score   support
+
+       Salah       0.75      0.60      0.67        10
+       Benar       0.67      0.80      0.73        10
+
+    accuracy                           0.70        20
+   macro avg       0.71      0.70      0.70        20
+weighted avg       0.71      0.70      0.70        20
+
+  [GRAFIK] Matriks disimpan ke → ./evaluasi_charts\matrix_correctness_tangkisan_kiri.png
+
+============================================================
+  LOSO: Correctness – Tangkisan Kanan   Accuracy: 0.7500 (75.0%)
+              precision    recall  f1-score   support
+
+       Salah       0.86      0.60      0.71        10
+       Benar       0.69      0.90      0.78        10
+
+    accuracy                           0.75        20
+   macro avg       0.77      0.75      0.74        20
+weighted avg       0.77      0.75      0.74        20
+
+  [GRAFIK] Matriks disimpan ke → ./evaluasi_charts\matrix_correctness_tangkisan_kanan.png
+
+============================================================
+  LOSO: Correctness – Kombinasi Kiri   Accuracy: 0.7500 (75.0%)
+              precision    recall  f1-score   support
+
+       Salah       0.86      0.60      0.71        10
+       Benar       0.69      0.90      0.78        10
+
+    accuracy                           0.75        20
+   macro avg       0.77      0.75      0.74        20
+weighted avg       0.77      0.75      0.74        20
+
+  [GRAFIK] Matriks disimpan ke → ./evaluasi_charts\matrix_correctness_kombinasi_kiri.png
+
+============================================================
+  LOSO: Correctness – Kombinasi Kanan   Accuracy: 0.5500 (55.0%)
+              precision    recall  f1-score   support
+
+       Salah       0.54      0.70      0.61        10
+       Benar       0.57      0.40      0.47        10
+
+    accuracy                           0.55        20
+   macro avg       0.55      0.55      0.54        20
+weighted avg       0.55      0.55      0.54        20
+
+  [GRAFIK] Matriks disimpan ke → ./evaluasi_charts\matrix_correctness_kombinasi_kanan.png
+
+[3/3] Saving final models…
+
+  Fitting final movement model on full data…
+  Saved → ./model\model_movement.pkl  (121.8 KB)
+  Fitting final model for Jep Kiri…
+  Saved → ./model\model_jep_kiri.pkl  (42.7 KB)
+  Fitting final model for Jep Kanan…
+  Saved → ./model\model_jep_kanan.pkl  (27.8 KB)
+  Fitting final model for Tangkisan Kiri…
+  Saved → ./model\model_tangkisan_kiri.pkl  (22.2 KB)
+  Fitting final model for Tangkisan Kanan…
+  Saved → ./model\model_tangkisan_kanan.pkl  (66.2 KB)
+  Fitting final model for Kombinasi Kiri…
+  Saved → ./model\model_kombinasi_kiri.pkl  (66.2 KB)
+  Fitting final model for Kombinasi Kanan…
+  Saved → ./model\model_kombinasi_kanan.pkl  (36.7 KB)
+
+✓ All done!
+  Models saved to : ./model
+  Charts saved to : ./evaluasi_charts

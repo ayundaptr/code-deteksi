@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SISTEM DETEKSI TEKNIK GERAKAN DASAR PENCAK SILAT</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    /* ── TEMA PUTIH (LIGHT MODE) ── */
+    --bg:      #f4f6f9;         
+    --surface: #ffffff;         
+    --card:    #ffffff;         
+    --border:  #dcdfe6;         
+    --accent:  #3498db;        
+    --green:   #2ecc71;         
+    --red:     #e74c3c;         
+    --yellow:  #f39c12;         
+    --text:    #2c3e50;         
+    --muted:   #909399;       
+    --radius:  12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* ── Header Institusi Formal ── */
+  .header-skripsi {
+    background: #2c3e50;
+    color: #ffffff;
+    padding: 24px;
+    border-radius: var(--radius);
+    text-align: center;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid #1a252f;
+  }
+  .header-skripsi h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+    max-width: 900px;
+    margin: 0 auto 8px;
+  }
+  .header-skripsi p {
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .subtitle { color: var(--muted); font-size: .85rem; margin-bottom: 24px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  }
+  .card h2 {
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── Controls ── */
+  .control-row { margin-bottom: 18px; }
+  .control-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: .88rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .control-row label span {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+    height: 6px;
+    background: #e4e7ed;
+    border-radius: 3px;
+  }
+
+  /* ── Status indicator ── */
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    font-size: .88rem;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .dot.live   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot.stream { background: #9b59b6; box-shadow: 0 0 6px #9b59b6; }
+  .dot.buffer { background: var(--yellow); }
+  .dot.error  { background: var(--red); }
+
+  /* ── Buffer bar ── */
+  .buffer-bar-wrap {
+    background: #f2f6fc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .buffer-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 6px;
+    transition: width .3s ease;
+    width: 0%;
+  }
+  .buffer-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: .75rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  button {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { filter: brightness(0.9); }
+  .btn-secondary { background: #f5f7fa; color: #606266; border: 1px solid var(--border); }
+  .btn-secondary:hover { color: var(--accent); border-color: var(--accent); background: #fff; }
+  .btn-danger { background: #fef0f0; color: var(--red); border: 1px solid #fde2e2; }
+  .btn-danger:hover { background: var(--red); color: #fff; }
+
+  /* ── Prediction display ── */
+  .prediction-main {
+    text-align: center;
+    padding: 24px 16px;
+    margin-bottom: 16px;
+    background: #f8fafc;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .pred-movement {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: .5px;
+    margin-bottom: 6px;
+  }
+  .pred-movement.none  { color: var(--muted); }
+  .pred-movement.benar { color: var(--green); }
+  .pred-movement.salah { color: var(--red); }
+  
+  .pred-correctness {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 4px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .pred-correctness.benar { background: rgba(46,204,113,.12); color: var(--green); }
+  .pred-correctness.salah { background: rgba(231,76,60,.12);  color: var(--red); }
+  .pred-correctness.none  { background: rgba(144,147,153,.1); color: var(--muted); }
+  
+  .confidence-bar-wrap {
+    background: #e4e7ed;
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin: 10px auto 4px;
+    max-width: 240px;
+  }
+  .confidence-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .4s ease, background .4s;
+  }
+  .pred-ts { font-size: .75rem; color: var(--muted); margin-top: 6px; }
+
+  /* ── Probability bars ── */
+  .prob-list { display: flex; flex-direction: column; gap: 8px; }
+  .prob-row { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+  .prob-label { width: 130px; flex-shrink: 0; color: #606266; }
+  .prob-track {
+    flex: 1;
+    background: #f2f6fc;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .prob-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width .4s ease;
+    opacity: .5;
+  }
+  .prob-fill.top { opacity: 1; background: #34495e; }
+  .prob-val { width: 45px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; }
+
+  /* ── Grid Pemantau Sensor Nyata ── */
+  .sensor-grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .sensor-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.78rem;
+  }
+  .sensor-box h3 {
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+  }
+  .sensor-data-line {
+    display: flex;
+    justify-content: space-between;
+    font-family: monospace;
+    margin-bottom: 2px;
+    color: #4a5568;
+  }
+  .sensor-data-line span:first-child {
+    font-weight: bold;
+    color: var(--muted);
+  }
+
+  /* ── Grid Grafik Sensor Real-Time ── */
+  .chart-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .chart-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    height: 180px;
+    position: relative;
+  }
+  .chart-box h4 {
+    font-size: 0.78rem;
+    color: #34495e;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── History log ── */
+  .history-list {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: .78rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--muted);
+  }
+  .history-item.benar { border-left-color: var(--green); background: #f0f9eb; border-color: #e1f3d8; }
+  .history-item.salah { border-left-color: var(--red); background: #fef0f0; border-color: #fde2e2; }
+  .history-ts { color: var(--muted); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .history-mv { font-weight: 600; flex: 1; color: var(--text); }
+  .history-corr { font-weight: 700; }
+  .history-corr.benar { color: var(--green); }
+  .history-corr.salah { color: var(--red); }
+  .history-conf { color: var(--muted); font-weight: 500; }
+
+  @media (max-width: 900px) {
+    .grid, .chart-grid-container { grid-template-columns: 1fr; }
+    .sensor-grid-container { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header-skripsi">
+  <h2>SISTEM DETEKSI GERAKAN TEKNIK DASAR PENCAK SILAT PSHT BERBASIS IOT MENGGUNAKAN METODE SUPPORT VECTOR MACHINE (SVM)</h2>
+  <p>Persaudaraan Setia Hati Terate</p>
+</div>
+
+<div class="grid">
+
+  <div>
+    <div class="card" style="margin-bottom:16px">
+      <h2>Connection</h2>
+
+      <div class="status-row">
+        <div class="dot" id="dot"></div>
+        <span id="status-text">Connecting…</span>
+      </div>
+
+      <div class="buffer-bar-wrap">
+        <div class="buffer-bar-fill" id="buf-fill"></div>
+      </div>
+      <div class="buffer-label">
+        <span>Buffer</span>
+        <span id="buf-label">— / —</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary"   id="btn-auto"   onclick="toggleAuto()">⏵ Stream SSE</button>
+        <button class="btn-secondary" id="btn-manual" onclick="manualPredict()">Predict now</button>
+        <button class="btn-danger"    onclick="clearHistory()">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Parameters</h2>
+
+      <div class="control-row">
+        <label>
+          Window Size
+          <span id="ws-val">30</span>
+        </label>
+        <input type="range" id="window-slider" min="5" max="200" value="30"
+               oninput="onWindowChange(this.value)"/>
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:3px">
+          <span>5</span><span>≈ 1 s at 100ms/sample</span><span>200</span>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <label>
+          Threshold
+          <span id="thr-val">40%</span>
+        </label>
+        <input type="range" id="threshold-slider" min="0" max="100" value="40"
+               oninput="onThresholdChange(this.value)"/>
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:3px">
+          <span>0%</span>
+          <span>Lower → more predictions</span>
+          <span>100%</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="width:100%"
+              onclick="applyConfig()">Apply to Server</button>
+      <div id="cfg-status" style="font-size:.78rem;color:var(--muted);margin-top:8px;text-align:center"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px">
+
+    <div class="card">
+      <h2>Latest Prediction</h2>
+      <div class="prediction-main">
+        <div class="pred-movement none" id="pred-mv">—</div>
+        <div>
+          <span class="pred-correctness none" id="pred-corr">—</span>
+        </div>
+        <div class="confidence-bar-wrap">
+          <div class="confidence-bar-fill" id="conf-fill" style="width:0%;background:var(--muted)"></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--muted)" id="conf-txt">confidence —</div>
+        <div class="pred-ts" id="pred-ts">—</div>
+      </div>
+
+      <h2 style="margin-bottom:12px">Movement Probabilities</h2>
+      <div class="prob-list" id="prob-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Prediction History</h2>
+      <div class="history-list" id="history-list">
+        <div style="color:var(--muted);font-size:.82rem;padding:8px">
+          No predictions yet. Press Stream SSE or Predict now.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Real-Time Movement ChartS</h2>
+      <div class="chart-grid-container">
+        <div class="chart-box">
+          <h4>Sensor 0</h4>
+          <canvas id="chart-0"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Sensor 1</h4>
+          <canvas id="chart-1"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Sensor 2</h4>
+          <canvas id="chart-2"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Sensor 3</h4>
+          <canvas id="chart-3"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Live Telemetry</h2>
+      <div class="sensor-grid-container" id="sensor-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let autoMode  = false;
+let eventSource = null;
+let pendingWS  = 30;
+let pendingThr = 0.40;
+const history  = [];
+const charts = []; // Menyimpan instances Chart.js
+const MAX_CHART_POINTS = 30; // Rentang titik grafik yang digambar
+
+const MOVEMENT_CLASSES = [
+  "Jep Kiri", "Jep Kanan",
+  "Tangkisan Kiri", "Tangkisan Kanan",
+  "Kombinasi Kiri", "Kombinasi Kanan",
+];
+
+// ── Initialize charts using Chart.js ───────────────────────────
+function initCharts() {
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    scales: {
+      x: { display: false },
+      y: { min: 0, max: 25, ticks: { font: { size: 9 } } }
+    },
+    plugins: { legend: { display: false } }
+  };
+
+  for (let i = 0; i < 4; i++) {
+    const ctx = document.getElementById(`chart-${i}`).getContext('2d');
+    charts[i] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Array(MAX_CHART_POINTS).fill(''),
+        datasets: [{
+          data: Array(MAX_CHART_POINTS).fill(0),
+          borderColor: '#3498db',
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.2
+        }]
+      },
+      options: chartOptions
+    });
+  }
+}
+
+// Fungsi untuk memperbarui grafik dengan rumus Magnitudo Vektor: sqrt(x2 + y2 + z2)
+function updateChartsWithNewData(s) {
+  for (let i = 0; i < 4; i++) {
+    const ax = s[`ax${i}`] || 0;
+    const ay = s[`ay${i}`] || 0;
+    const az = s[`az${i}`] || 0;
+    const mag = Math.sqrt(ax*ax + ay*ay + az*az); // Menghitung sinyal kekuatan gerakan silat
+    
+    const chart = charts[i];
+    chart.data.datasets[0].data.push(mag);
+    chart.data.datasets[0].data.shift();
+    chart.update();
+  }
+}
+
+// ── Initialise probability bars & sensor grid ──────────────────
+function initProbBars() {
+  const el = document.getElementById("prob-list");
+  el.innerHTML = MOVEMENT_CLASSES.map(mv => `
+    <div class="prob-row" id="bar-${mv.replace(/ /g,"_")}">
+      <div class="prob-label">${mv}</div>
+      <div class="prob-track"><div class="prob-fill" style="width:0%"></div></div>
+      <div class="prob-val">—</div>
+    </div>
+  `).join("");
+}
+
+function initSensorGrid() {
+  const el = document.getElementById("sensor-grid");
+  let html = "";
+  for(let i=0; i<4; i++) {
+    html += `
+      <div class="sensor-box">
+        <h3>Sensor ${i}</h3>
+        <div class="sensor-data-line"><span>Ax:</span><span id="s-${i}-ax">—</span></div>
+        <div class="sensor-data-line"><span>Ay:</span><span id="s-${i}-ay">—</span></div>
+        <div class="sensor-data-line"><span>Az:</span><span id="s-${i}-az">—</span></div>
+        <div class="sensor-data-line"><span>Gx:</span><span id="s-${i}-gx">—</span></div>
+        <div class="sensor-data-line"><span>Gy:</span><span id="s-${i}-gy">—</span></div>
+        <div class="sensor-data-line"><span>Gz:</span><span id="s-${i}-gz">—</span></div>
+      </div>
+    `;
+  }
+  el.innerHTML = html;
+}
+
+initProbBars();
+initSensorGrid();
+initCharts();
+
+// ── Slider handlers ────────────────────────────────────────────
+function onWindowChange(v) {
+  pendingWS = parseInt(v);
+  document.getElementById("ws-val").textContent = v;
+}
+function onThresholdChange(v) {
+  pendingThr = parseInt(v) / 100;
+  document.getElementById("thr-val").textContent = v + "%";
+}
+
+async function applyConfig() {
+  const res = await fetch("/config", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({window_size: pendingWS, none_threshold: pendingThr})
+  });
+  const j = await res.json();
+  const el = document.getElementById("cfg-status");
+  if (res.ok) {
+    el.style.color = "var(--green)";
+    el.textContent = `✓ Applied: window=${j.config.window_size} threshold=${(j.config.none_threshold*100).toFixed(0)}%`;
+  } else {
+    el.style.color = "var(--red)";
+    el.textContent = "✗ " + (j.error || "Error");
+  }
+  setTimeout(() => el.textContent = "", 3000);
+}
+
+// ── SSE Stream Mode ─────────────────────────────────────────────
+function toggleAuto() {
+  autoMode = !autoMode;
+  const btn = document.getElementById("btn-auto");
+  
+  if (autoMode) {
+    btn.textContent = "⏸ Stop Stream";
+    btn.classList.replace("btn-primary", "btn-danger");
+    updateDot("stream", "Connecting SSE Stream…");
+    
+    eventSource = new EventSource("/stream");
+    
+    eventSource.onmessage = function(event) {
+      const j = JSON.parse(event.data);
+      
+      if (j.status === "buffering") {
+        updateDot("buffer", `Buffering… ${j.buffer_size}/${j.need} samples`);
+        updateBufferBar(j.buffer_size, j.need);
+        return;
+      }
+      if (j.error) {
+        updateDot("error", j.error);
+        return;
+      }
+      
+      updateDot("stream", `Streaming Active · buffer ${j.buffer_size} samples`);
+      updateBufferBar(j.buffer_size, pendingWS);
+      renderResult(j);
+      if (j.latest_sensor) {
+        renderSensorData(j.latest_sensor);
+        updateChartsWithNewData(j.latest_sensor);
+      }
+    };
+    
+    eventSource.onerror = function() {
+      updateDot("error", "SSE Stream disconnected. Reconnecting…");
+    };
+
+  } else {
+    btn.textContent = "⏵ Stream SSE";
+    btn.classList.replace("btn-danger", "btn-primary");
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+    pollStatus();
+  }
+}
+
+async function manualPredict() {
+  if (autoMode) toggleAuto();
+  updateDot("buffer", "Fetching manual predict…");
+  await fetchPredict();
+}
+
+// ── Core manual fetch ──────────────────────────────────────────
+async function fetchPredict() {
+  try {
+    const res = await fetch("/predict");
+    const j   = await res.json();
+
+    if (j.status === "buffering") {
+      updateDot("buffer", `Buffering… ${j.buffer_size}/${j.need} samples`);
+      updateBufferBar(j.buffer_size, j.need);
+      return;
+    }
+    if (j.error) {
+      updateDot("error", j.error);
+      return;
+    }
+
+    updateDot("live", `Single Pred Done · buffer ${j.buffer_size} samples`);
+    updateBufferBar(j.buffer_size, pendingWS);
+    renderResult(j);
+    if (j.latest_sensor) {
+      updateChartsWithNewData(j.latest_sensor);
+    }
+
+  } catch(e) {
+    updateDot("error", "Server unreachable — is silat_server.py running?");
+  }
+}
+
+// ── Poll buffer status ─────────────────────────────────────────
+async function pollStatus() {
+  if (autoMode) return;
+  try {
+    const res = await fetch("/status");
+    const j   = await res.json();
+    updateBufferBar(j.buffer_size, j.window_size);
+    if (j.buffer_size < j.window_size) {
+      updateDot("buffer", `Buffering… ${j.buffer_size}/${j.window_size}`);
+    } else {
+      updateDot("live", `Ready · ${j.buffer_size} samples in buffer`);
+    }
+  } catch(_) {}
+}
+setInterval(pollStatus, 2000);
+pollStatus();
+
+// ── Render Telemetri Sensor ────────────────────────────────────
+function renderSensorData(s) {
+  for(let i=0; i<4; i++) {
+    document.getElementById(`s-${i}-ax`).textContent = s[`ax${i}`] ? s[`ax${i}`].toFixed(2) : "—";
+    document.getElementById(`s-${i}-ay`).textContent = s[`ay${i}`] ? s[`ay${i}`].toFixed(2) : "—";
+    document.getElementById(`s-${i}-az`).textContent = s[`az${i}`] ? s[`az${i}`].toFixed(2) : "—";
+    document.getElementById(`s-${i}-gx`).textContent = s[`gx${i}`] ? s[`gx${i}`].toFixed(2) : "—";
+    document.getElementById(`s-${i}-gy`).textContent = s[`gy${i}`] ? s[`gy${i}`].toFixed(2) : "—";
+    document.getElementById(`s-${i}-gz`).textContent = s[`gz${i}`] ? s[`gz${i}`].toFixed(2) : "—";
+  }
+}
+
+// ── Render prediction result ───────────────────────────────────
+function renderResult(j) {
+  const mv   = j.movement || "None";
+  const corr = j.correctness ? j.correctness.label : null;
+  const conf = j.mv_confidence || 0;
+  const ts   = j.timestamp ? new Date(j.timestamp).toLocaleTimeString() : "—";
+
+  const mvEl = document.getElementById("pred-mv");
+  mvEl.textContent = mv;
+  mvEl.className   = "pred-movement " + (mv === "None" ? "none" : (corr === "Benar" ? "benar" : (corr === "Salah" ? "salah" : "")));
+
+  const corrEl = document.getElementById("pred-corr");
+  if (corr) {
+    corrEl.textContent = corr;
+    corrEl.className   = "pred-correctness " + corr.toLowerCase();
+  } else {
+    corrEl.textContent = mv === "None" ? "Below threshold" : "—"; 
+    corrEl.className   = "pred-correctness none";
+  }
+
+  const pct    = (conf * 100).toFixed(1);
+  const fillEl = document.getElementById("conf-fill");
+  fillEl.style.width      = pct + "%";
+  fillEl.style.background = conf >= 0.7 ? "var(--green)" : conf >= 0.4 ? "var(--yellow)" : "var(--red)";
+  document.getElementById("conf-txt").textContent = `confidence ${pct}%`;
+  document.getElementById("pred-ts").textContent  = ts;
+
+  if (j.mv_probabilities) {
+    const probs = j.mv_probabilities;
+    const maxP  = Math.max(...Object.values(probs));
+    MOVEMENT_CLASSES.forEach(m => {
+      const p   = probs[m] || 0;
+      const key = m.replace(/ /g, "_");
+      const row = document.getElementById("bar-" + key);
+      if (!row) return;
+      const fill = row.querySelector(".prob-fill");
+      fill.style.width = (p * 100).toFixed(1) + "%";
+      fill.classList.toggle("top", Math.abs(p - maxP) < 0.001);
+      row.querySelector(".prob-val").textContent = (p * 100).toFixed(1) + "%";
+    });
+  }
+
+  if (mv !== "None") {
+    addHistory(mv, corr, conf, ts);
+  }
+}
+
+// ── History ────────────────────────────────────────────────────
+function addHistory(mv, corr, conf, ts) {
+  const item = { mv, corr, conf, ts };
+  history.unshift(item);
+  if (history.length > 50) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const el  = document.getElementById("history-list");
+  const cls = h => h.mv === "None" ? "none" : (h.corr === "Benar" ? "benar" : "salah");
+  el.innerHTML = history.map(h => `
+    <div class="history-item ${cls(h)}">
+      <span class="history-ts">${h.ts}</span>
+      <span class="history-mv">${h.mv}</span>
+      <span class="history-corr ${h.corr ? h.corr.toLowerCase() : 'none'}">${h.corr || "—"}</span>
+      <span class="history-conf">${(h.conf*100).toFixed(0)}%</span>
+    </div>
+  `).join("");
+}
+
+function clearHistory() {
+  history.length = 0;
+  document.getElementById("history-list").innerHTML =
+    `<div style="color:var(--muted);font-size:.82rem;padding:8px">History cleared.</div>`;
+  resetDisplay();
+}
+
+function resetDisplay() {
+  document.getElementById("pred-mv").textContent   = "—";
+  document.getElementById("pred-mv").className     = "pred-movement none";
+  document.getElementById("pred-corr").textContent = "—";
+  document.getElementById("pred-corr").className   = "pred-correctness none";
+  document.getElementById("conf-fill").style.width = "0%";
+  document.getElementById("conf-txt").textContent  = "confidence —";
+  document.getElementById("pred-ts").textContent   = "—";
+  MOVEMENT_CLASSES.forEach(m => {
+    const row = document.getElementById("bar-" + m.replace(/ /g,"_"));
+    if (!row) return;
+    row.querySelector(".prob-fill").style.width = "0%";
+    row.querySelector(".prob-val").textContent  = "—";
+  });
+  for(let i=0; i<4; i++) {
+    document.getElementById(`s-${i}-ax`).textContent = "—";
+    document.getElementById(`s-${i}-ay`).textContent = "—";
+    document.getElementById(`s-${i}-az`).textContent = "—";
+    document.getElementById(`s-${i}-gx`).textContent = "—";
+    document.getElementById(`s-${i}-gy`).textContent = "—";
+    document.getElementById(`s-${i}-gz`).textContent = "—";
+    charts[i].data.datasets[0].data = Array(MAX_CHART_POINTS).fill(0);
+    charts[i].update();
+  }
+}
+
+// ── UI helpers ─────────────────────────────────────────────────
+function updateDot(state, text) {
+  document.getElementById("dot").className       = "dot " + state;
+  document.getElementById("status-text").textContent = text;
+}
+
+// Buffer bar
+function updateBufferBar(current, max) {
+  const pct = Math.min(100, Math.round((current / Math.max(max, 1)) * 100));
+  document.getElementById("buf-fill").style.width = pct + "%";
+  document.getElementById("buf-label").textContent = `${current} / ${max}`;
+}
+</script>
+</body>
+</html>
